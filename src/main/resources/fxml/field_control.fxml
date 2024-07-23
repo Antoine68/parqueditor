@@ -14,7 +14,7 @@
       <HBox alignment="CENTER_LEFT" spacing="15.0" VBox.vgrow="NEVER">
          <children>
             <Text  fx:id="toggle" onMouseClicked="#toggle" />
-            <Text text="Name" HBox.hgrow="ALWAYS" />
+            <Text text="%Name" HBox.hgrow="ALWAYS" />
             <TextField fx:id="name" prefHeight="0.0" prefWidth="75.0" HBox.hgrow="ALWAYS" />
          </children>
          <VBox.margin>
@@ -25,7 +25,7 @@
          <children>
             <HBox alignment="CENTER_LEFT" spacing="15.0">
                <children>
-                  <Text text="Type" HBox.hgrow="ALWAYS" />
+                  <Text text="%Type" HBox.hgrow="ALWAYS" />
                   <ComboBox fx:id="type" HBox.hgrow="ALWAYS" />
                </children>
                <VBox.margin>
@@ -34,13 +34,13 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="15.0">
                <children>
-                  <Text text="Default" HBox.hgrow="ALWAYS" />
+                  <Text text="%Default" HBox.hgrow="ALWAYS" />
                   <TextField fx:id="defaultValue" prefHeight="0.0" prefWidth="75.0" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="15.0">
                <children>
-                  <Text text="Nullable" HBox.hgrow="ALWAYS" />
+                  <Text text="%Nullable" HBox.hgrow="ALWAYS" />
                   <CheckBox fx:id="nullable" mnemonicParsing="false" />
                </children>
             </HBox>

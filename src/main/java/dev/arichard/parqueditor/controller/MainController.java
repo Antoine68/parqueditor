@@ -1,6 +1,7 @@
 package dev.arichard.parqueditor.controller;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +59,9 @@ public class MainController implements Initializable {
 				final TableRow<Map<FieldAdapter, StringProperty>> row = new TableRow<>();
 	            final ContextMenu rowMenu = new ContextMenu();
 	            rowMenu.getItems().addAll(
-	            	createMenuItem("Add row before", e -> addRow(row.getItem(), 0)),
-	            	createMenuItem("Add row after", e -> addRow(row.getItem(), 1)),
-	            	createMenuItem("Delete row", e -> contentTable.getItems().remove(row.getItem()))
+	            	createMenuItem(concatLocales(" ", "Add", "row", "before"), e -> addRow(row.getItem(), 0)),
+	            	createMenuItem(concatLocales(" ", "Add", "row", "after"), e -> addRow(row.getItem(), 1)),
+	            	createMenuItem(concatLocales(" ", "Delete", "row"), e -> contentTable.getItems().remove(row.getItem()))
 	            );
 	            row.contextMenuProperty().bind(
 	                    Bindings.when(row.emptyProperty())
@@ -69,6 +70,10 @@ public class MainController implements Initializable {
 	            return row;
 			}
 		});
+	}
+	
+	private String concatLocales(String sep, String...locales) {
+		return String.join(sep, Arrays.stream(locales).map(l -> resources.getString(l)).toArray(String[]::new));
 	}
 	
 	private MenuItem createMenuItem(String text, Consumer<ActionEvent> action) {
@@ -90,7 +95,7 @@ public class MainController implements Initializable {
 	
 	@FXML
 	private void addField() {
-		fields.add(new FieldAdapter("field" + (fields.size() + 1)));
+		fields.add(new FieldAdapter(resources.getString("Field") + (fields.size() + 1)));
 	}
 	
 	private void createListeners() {

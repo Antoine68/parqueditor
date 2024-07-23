@@ -52,7 +52,8 @@ public class FieldControl extends VBox {
 	private final FieldAdapter field;
 	
 	public FieldControl(ResourceBundle resources, FieldAdapter field) {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/field_control.fxml"));
+		this.resources = resources;
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/field_control.fxml"), this.resources);
 		fxmlLoader.setRoot(this);
 		fxmlLoader.setController(this);
 		try {
@@ -61,7 +62,6 @@ public class FieldControl extends VBox {
 			throw new RuntimeException(exception);
 		}
 		this.type.getItems().setAll(typeChoices);
-		this.resources = resources;
 		this.field = field;
 		this.setUserData(this.field);
 		createListeners();
