@@ -15,24 +15,24 @@ import javafx.stage.Stage;
 
 @SpringBootApplication
 public class Parqueditor extends Application {
-	
-	private ConfigurableApplicationContext context;
-	
-	public static void callLaunch(String[] args) {
-		launch(args);
-	}
-	
+
+    private ConfigurableApplicationContext context;
+
+    public static void callLaunch(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void init() throws Exception {
-    	SpringApplication application = new SpringApplication(Parqueditor.class);
-    	application.setWebApplicationType(WebApplicationType.NONE);
+        SpringApplication application = new SpringApplication(Parqueditor.class);
+        application.setWebApplicationType(WebApplicationType.NONE);
         this.context = application.run();
     }
-	
-	@Override
+
+    @Override
     public void start(Stage primaryStage) throws IOException {
-		FxmlService fxmlService = this.context.getBean(FxmlService.class);
-		Parent root = fxmlService.load("/fxml/main.fxml");
+        FxmlService fxmlService = this.context.getBean(FxmlService.class);
+        Parent root = fxmlService.load("/fxml/main.fxml");
         Scene scene = new Scene(root);
         primaryStage.setTitle("Parqueditor");
         primaryStage.setScene(scene);

@@ -13,19 +13,20 @@ import org.apache.parquet.hadoop.ParquetReader;
  * 
  */
 public class ParquetParser implements Parser<List<GenericRecord>> {
-	
-	public List<GenericRecord> parse(File file) {
-		List<GenericRecord> result = new ArrayList<>();
-		try (ParquetReader<Object> parquetReader = AvroParquetReader.builder(new LocalInputFile(file.toPath())).build()) {
-			GenericRecord record = (GenericRecord) parquetReader.read();
-			while(record != null) {
-				result.add(record);
-				record = (GenericRecord) parquetReader.read();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
+
+    public List<GenericRecord> parse(File file) {
+        List<GenericRecord> result = new ArrayList<>();
+        try (ParquetReader<Object> parquetReader = AvroParquetReader.builder(new LocalInputFile(file.toPath()))
+                .build()) {
+            GenericRecord record = (GenericRecord) parquetReader.read();
+            while (record != null) {
+                result.add(record);
+                record = (GenericRecord) parquetReader.read();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 
 }
