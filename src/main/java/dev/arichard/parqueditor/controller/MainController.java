@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import dev.arichard.parqueditor.adapter.FieldAdapter;
+import dev.arichard.parqueditor.service.FxmlService;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -37,6 +40,9 @@ import javafx.util.Callback;
 @Component
 @Scope("prototype")
 public class MainController implements Initializable {
+    
+    @Autowired
+    private FxmlService fxmlService;
 
     @FXML
     private TableView<Map<FieldAdapter, StringProperty>> contentTable;
@@ -124,7 +130,14 @@ public class MainController implements Initializable {
     }
 
     private void addFieldControl(FieldAdapter field) {
-        FieldControl fieldControl = new FieldControl(resources, field);
+        AtomicBoolean success = new AtomicBoolean(false);
+        FieldControl fieldControl = new FieldControl((view, control) -> {
+            success.set(fxmlService.safeLoad(view, control) != null);
+            return success.get();
+        }, resources, field);
+        if (!success.get()) {
+            return;
+        }
         fieldControl.setOnRemove(() -> {
             fields.remove(field);
         });

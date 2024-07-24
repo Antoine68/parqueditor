@@ -10,6 +10,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 @Service
 public class FxmlService {
@@ -28,11 +30,34 @@ public class FxmlService {
         }
         bundle = ResourceBundle.getBundle("bundles/Parqueditor", new Locale(userLocale));
     }
+    
+    public <T> T load(String path, Object control) throws IOException {
+        FXMLLoader fxmlLoader = createLoader(path);
+        fxmlLoader.setRoot(control);
+        fxmlLoader.setController(control);
+        return fxmlLoader.load();
+    }
+    
+    public <T> T safeLoad(String path, Object control) {
+        try {
+            return load(path, control);
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setHeaderText("Error during " + path + " control loading");
+            alert.setContentText(e.getMessage());
+            alert.show();
+        }
+        return null;
+    }
 
     public <T> T load(String path) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(path), bundle);
+        FXMLLoader fxmlLoader = createLoader(path);
         fxmlLoader.setControllerFactory(this.context::getBean);
         return fxmlLoader.load();
+    }
+    
+    private FXMLLoader createLoader(String path) {
+        return new FXMLLoader(getClass().getResource(path), bundle);
     }
 
 }

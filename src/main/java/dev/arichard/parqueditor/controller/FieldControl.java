@@ -2,6 +2,9 @@ package dev.arichard.parqueditor.controller;
 
 import java.io.IOException;
 import java.util.ResourceBundle;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 import org.apache.avro.Schema;
 
@@ -50,21 +53,15 @@ public class FieldControl extends VBox {
 
     private final FieldAdapter field;
 
-    public FieldControl(ResourceBundle resources, FieldAdapter field) {
+    public FieldControl(BiPredicate<String, Object> viewBuilder, ResourceBundle resources, FieldAdapter field) {
         this.resources = resources;
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/field_control.fxml"), this.resources);
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-        this.type.getItems().setAll(typeChoices);
         this.field = field;
-        this.setUserData(this.field);
-        createListeners();
-        toggle();
+        if (viewBuilder.test("/fxml/field_control.fxml", this)) {
+            this.type.getItems().setAll(typeChoices);
+            this.setUserData(this.field);
+            createListeners();
+            toggle();
+        }
     }
 
     @FXML
