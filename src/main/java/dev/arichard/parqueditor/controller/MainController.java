@@ -29,6 +29,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -36,6 +37,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 
 @Component
 @Scope("prototype")
@@ -165,7 +167,14 @@ public class MainController implements Initializable {
                         });
                     }
                 });
-        col.setCellFactory(TextFieldTableCell.forTableColumn());
+        col.setCellFactory(new Callback<TableColumn<Map<FieldAdapter,StringProperty>,String>, TableCell<Map<FieldAdapter,StringProperty>,String>>() {
+            
+            @Override
+            public TableCell<Map<FieldAdapter, StringProperty>, String> call(
+                    TableColumn<Map<FieldAdapter, StringProperty>, String> param) {
+                return new EditableTableCell<Map<FieldAdapter,StringProperty>>();
+            }
+        });
         col.setUserData(field);
         col.textProperty().bind(field.nameProperty());
         contentTable.getColumns().add(col);
@@ -200,6 +209,18 @@ public class MainController implements Initializable {
         }
         if (idx >= 0) {
             nodes.remove(idx);
+        }
+    }
+    
+    private class StringPropertyConverter extends StringConverter<StringProperty> {
+        /** {@inheritDoc} */
+        @Override public String toString(StringProperty value) {
+            return (value != null) ? value.get() : "";
+        }
+
+        /** {@inheritDoc} */
+        @Override public StringProperty fromString(String value) {
+            return new SimpleStringProperty(value);
         }
     }
 }
