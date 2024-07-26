@@ -34,6 +34,7 @@ public class Parqueditor extends Application {
         FxmlService fxmlService = this.context.getBean(FxmlService.class);
         Parent root = fxmlService.load("/fxml/main.fxml");
         Scene scene = new Scene(root);
+        scene.getStylesheets().add("/css/style.css");
         primaryStage.setTitle("Parqueditor");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
