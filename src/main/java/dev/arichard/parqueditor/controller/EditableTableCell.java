@@ -3,7 +3,6 @@ package dev.arichard.parqueditor.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;

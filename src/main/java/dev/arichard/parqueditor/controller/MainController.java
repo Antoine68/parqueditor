@@ -211,16 +211,4 @@ public class MainController implements Initializable {
             nodes.remove(idx);
         }
     }
-    
-    private class StringPropertyConverter extends StringConverter<StringProperty> {
-        /** {@inheritDoc} */
-        @Override public String toString(StringProperty value) {
-            return (value != null) ? value.get() : "";
-        }
-
-        /** {@inheritDoc} */
-        @Override public StringProperty fromString(String value) {
-            return new SimpleStringProperty(value);
-        }
-    }
 }
