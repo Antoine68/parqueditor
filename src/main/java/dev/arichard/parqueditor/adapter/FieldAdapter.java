@@ -23,6 +23,13 @@ public class FieldAdapter {
         this.name.set(name);
     }
 
+    public FieldAdapter(String name, Schema.Type type, String defaultValue, boolean nullable) {
+        this.name.set(name);
+        this.type.set(type);
+        this.defaultValue.set(defaultValue);
+        this.nullable.set(nullable);
+    }
+    
     public String getName() {
         return name.get();
     }

@@ -1,7 +1,10 @@
 package dev.arichard.parqueditor.parser;
 
 import java.io.File;
+import java.util.List;
+import java.util.function.Consumer;
 
 public interface Parser<O> {
-    O parse(File file);
+    List<O> parse(File file);
+    void streamParse(File file, Consumer<O> linerConsumer);
 }

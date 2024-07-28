@@ -1,20 +1,33 @@
 package dev.arichard.parqueditor.controller;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import dev.arichard.parqueditor.adapter.FieldAdapter;
+import dev.arichard.parqueditor.adapter.ParquetFileAdapter;
+import dev.arichard.parqueditor.processor.ParquetFileAdapterProcessor;
+import dev.arichard.parqueditor.processor.Processor;
+import dev.arichard.parqueditor.service.FileService;
 import dev.arichard.parqueditor.service.FxmlService;
+import dev.arichard.parqueditor.service.ParquetFileService;
+import dev.arichard.parqueditor.service.ThreadService;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -31,26 +44,34 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 
 @Component
 @Scope("prototype")
 public class MainController implements Initializable {
-    
+
     @Autowired
     private FxmlService fxmlService;
+
+    @Autowired
+    private ThreadService threadService;
+
+    @Autowired
+    private FileService<GenericRecord> parquetFileService;
 
     @FXML
     private TableView<Map<FieldAdapter, StringProperty>> contentTable;
 
     @FXML
     private VBox fieldContainer;
+
+    private final ExtensionFilter openExtensionFilter = new ExtensionFilter("Parquet", List.of("*.parquet"));
 
     private final ObservableList<FieldAdapter> fields = FXCollections.observableArrayList();
 
@@ -82,6 +103,31 @@ public class MainController implements Initializable {
                 });
     }
 
+    @FXML
+    private void addField() {
+        fields.add(new FieldAdapter(resources.getString("Field") + (fields.size() + 1)));
+    }
+
+    @FXML
+    private void openFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(openExtensionFilter);
+        fileChooser.setSelectedExtensionFilter(openExtensionFilter);
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            contentTable.getItems().clear();
+            fields.clear();
+            threadService.executeTaskThenUpdateUi(() -> {
+                Processor<GenericRecord, ParquetFileAdapter> processor = new ParquetFileAdapterProcessor();
+                parquetFileService.consumeFile(file, processor::processLine);
+                return processor.getProcessedValue();
+            }, adapter -> {
+                fields.setAll(adapter.getFields());
+                contentTable.getItems().setAll(adapter.getLines());
+            }, null);
+        }
+    }
+
     private String concatLocales(String sep, String... locales) {
         return String.join(sep, Arrays.stream(locales).map(l -> resources.getString(l)).toArray(String[]::new));
     }
@@ -102,11 +148,6 @@ public class MainController implements Initializable {
         if (idx < 0)
             return;
         contentTable.getItems().add(Math.max(0, idx + delta), new HashMap<>());
-    }
-
-    @FXML
-    private void addField() {
-        fields.add(new FieldAdapter(resources.getString("Field") + (fields.size() + 1)));
     }
 
     private void createListeners() {
@@ -167,14 +208,15 @@ public class MainController implements Initializable {
                         });
                     }
                 });
-        col.setCellFactory(new Callback<TableColumn<Map<FieldAdapter,StringProperty>,String>, TableCell<Map<FieldAdapter,StringProperty>,String>>() {
-            
-            @Override
-            public TableCell<Map<FieldAdapter, StringProperty>, String> call(
-                    TableColumn<Map<FieldAdapter, StringProperty>, String> param) {
-                return new EditableTableCell<Map<FieldAdapter,StringProperty>>();
-            }
-        });
+        col.setCellFactory(
+                new Callback<TableColumn<Map<FieldAdapter, StringProperty>, String>, TableCell<Map<FieldAdapter, StringProperty>, String>>() {
+
+                    @Override
+                    public TableCell<Map<FieldAdapter, StringProperty>, String> call(
+                            TableColumn<Map<FieldAdapter, StringProperty>, String> param) {
+                        return new EditableTableCell<Map<FieldAdapter, StringProperty>>();
+                    }
+                });
         col.setUserData(field);
         col.textProperty().bind(field.nameProperty());
         contentTable.getColumns().add(col);
