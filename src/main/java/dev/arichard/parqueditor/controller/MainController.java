@@ -191,21 +191,7 @@ public class MainController implements Initializable {
                     @Override
                     public ObservableValue<String> call(
                             CellDataFeatures<Map<FieldAdapter, StringProperty>, String> param) {
-                        return param.getValue().computeIfAbsent(field, f -> {
-                            StringProperty s = new SimpleStringProperty();
-                            s.addListener((obs, old, val) -> {
-                                if (field.getDefaultValue() != null && !field.getDefaultValue().isBlank()
-                                        && (val == null || val.isBlank())) {
-                                    s.set(field.getDefaultValue());
-                                }
-                            });
-                            field.defaultValueProperty().addListener((obs, old, val) -> {
-                                if (val != null && !val.isBlank() && (s.get() == null || s.get().isBlank())) {
-                                    s.set(val);
-                                }
-                            });
-                            return s;
-                        });
+                        return param.getValue().computeIfAbsent(field, f -> new SimpleStringProperty());
                     }
                 });
         col.setCellFactory(
