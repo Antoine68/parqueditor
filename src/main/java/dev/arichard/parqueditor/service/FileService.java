@@ -5,8 +5,7 @@ import java.util.function.Consumer;
 
 public interface FileService<T> {
     
-     void consumeFile(File file, Consumer<T> lineConsumer);
-     
+     void consumeFile(File file, Consumer<T> lineConsumer);     
      
     
 }

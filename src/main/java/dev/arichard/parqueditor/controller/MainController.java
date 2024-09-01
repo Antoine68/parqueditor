@@ -23,11 +23,14 @@ import org.springframework.stereotype.Component;
 import dev.arichard.parqueditor.adapter.FieldAdapter;
 import dev.arichard.parqueditor.adapter.ParquetFileAdapter;
 import dev.arichard.parqueditor.processor.ParquetFileAdapterProcessor;
+import dev.arichard.parqueditor.processor.ParquetSchemaProcessor;
 import dev.arichard.parqueditor.processor.Processor;
+import dev.arichard.parqueditor.processor.RecordsProcessor;
 import dev.arichard.parqueditor.service.FileService;
 import dev.arichard.parqueditor.service.FxmlService;
 import dev.arichard.parqueditor.service.ParquetFileService;
 import dev.arichard.parqueditor.service.ThreadService;
+import dev.arichard.parqueditor.writer.ParquetWriter;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -70,7 +73,9 @@ public class MainController implements Initializable {
 
     @FXML
     private VBox fieldContainer;
-
+    
+    private File currentFile;
+ 
     private final ExtensionFilter openExtensionFilter = new ExtensionFilter("Parquet", List.of("*.parquet"));
 
     private final ObservableList<FieldAdapter> fields = FXCollections.observableArrayList();
@@ -115,6 +120,7 @@ public class MainController implements Initializable {
         fileChooser.setSelectedExtensionFilter(openExtensionFilter);
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
+            currentFile = file;
             contentTable.getItems().clear();
             fields.clear();
             threadService.executeTaskThenUpdateUi(() -> {
@@ -126,6 +132,45 @@ public class MainController implements Initializable {
                 contentTable.getItems().setAll(adapter.getLines());
             }, null);
         }
+    }
+    
+    @FXML
+    private void save() {
+        if (currentFile == null) {
+            openSaveAs();
+            return;
+        }
+        save(currentFile);        
+    }
+    
+    @FXML
+    private void openSaveAs() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(openExtensionFilter);
+        fileChooser.setSelectedExtensionFilter(openExtensionFilter);
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            save(file);
+        }
+    }
+    
+    private void save(File file) {
+        threadService.executeTaskThenUpdateUi(() -> {
+            ParquetSchemaProcessor schemaProcessor = new ParquetSchemaProcessor("schema", "");
+            for (FieldAdapter fieldAdapter: fields) {
+                schemaProcessor.processLine(fieldAdapter);
+            }
+            Schema schema = schemaProcessor.getProcessedValue();
+            System.out.println(schema);
+            RecordsProcessor recordsProcessor = new RecordsProcessor(schema);
+            for (Map<FieldAdapter, StringProperty> line: contentTable.getItems()) {
+                recordsProcessor.processLine(line);
+            }
+            ParquetWriter writer = new ParquetWriter(schema, recordsProcessor.getProcessedValue());
+            writer.write(file);
+            return null;
+        }, null, null);
+        
     }
 
     private String concatLocales(String sep, String... locales) {

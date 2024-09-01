@@ -22,8 +22,8 @@
           <items>
             <MenuItem onAction="#openFile" mnemonicParsing="false" text="%Open" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="%Save" />
-            <MenuItem mnemonicParsing="false" text="%Save.As" />
+            <MenuItem onAction="#save" mnemonicParsing="false" text="%Save" />
+            <MenuItem onAction="#openSaveAs" mnemonicParsing="false" text="%Save.As" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="%Quit" />
           </items>

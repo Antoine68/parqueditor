@@ -8,9 +8,19 @@ import javafx.beans.property.StringProperty;
 
 public class ParquetFileAdapter {
     
-    private final List<FieldAdapter> fields = new ArrayList<>();
+    private final List<FieldAdapter> fields;
     
-    private final List<Map<FieldAdapter, StringProperty>> lines = new ArrayList<>();
+    private final List<Map<FieldAdapter, StringProperty>> lines;
+    
+    public ParquetFileAdapter() {
+        this.fields = new ArrayList<>();
+        this.lines = new ArrayList<>();
+    }
+    
+    public ParquetFileAdapter(List<FieldAdapter> fields, List<Map<FieldAdapter, StringProperty>> lines) {
+        this.fields = fields;
+        this.lines = lines;
+    }
     
     public void addField(FieldAdapter field) {
         fields.add(field);
