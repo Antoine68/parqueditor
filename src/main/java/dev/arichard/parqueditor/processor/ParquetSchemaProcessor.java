@@ -76,6 +76,13 @@ public class ParquetSchemaProcessor implements Processor<FieldAdapter, Schema>{
                 typeBuilder.floatType().noDefault();
             }
             break;
+        case LONG:
+            if (defaultValue != null) {
+                typeBuilder.longType().longDefault(Long.parseLong(defaultValue));
+            } else {
+                typeBuilder.longType().noDefault();
+            }
+            break;
         case BYTES:
             typeBuilder.bytesType().noDefault();
             break;
