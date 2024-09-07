@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldTypeBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
 import org.apache.avro.SchemaBuilder.TypeBuilder;
@@ -14,19 +15,21 @@ import dev.arichard.parqueditor.adapter.FieldAdapter;
 public class ParquetSchemaProcessor implements Processor<FieldAdapter, Schema>{
     
     private final RecordBuilder<Schema> builder;
+    private final FieldAssembler<Schema> fields;
     
     public ParquetSchemaProcessor(String name, String namespace) {
         builder = SchemaBuilder.record(name).namespace(namespace);
+        fields = builder.fields();
     }
 
     @Override
     public void processLine(FieldAdapter field) {
-        createType(field, builder.fields().name(field.getName()).type());
+        createType(field, fields.name(field.getName()).type());
     }
 
     @Override
     public Schema getProcessedValue() {
-        return builder.fields().endRecord();
+        return fields.endRecord();
     }
     
     private void createType(FieldAdapter field, FieldTypeBuilder<Schema> typeBuilder) {
@@ -42,39 +45,39 @@ public class ParquetSchemaProcessor implements Processor<FieldAdapter, Schema>{
             if (defaultValue != null) {
                 typeBuilder.booleanType().booleanDefault(Boolean.parseBoolean(defaultValue));
             } else {
-                typeBuilder.booleanType();
+                typeBuilder.booleanType().noDefault();
             }
             break;
         case STRING:
             if (defaultValue != null) {
                 typeBuilder.stringType().stringDefault(defaultValue);
             } else {
-                typeBuilder.stringType();
+                typeBuilder.stringType().noDefault();
             }
             break;
         case INT:
             if (defaultValue != null) {
                 typeBuilder.intType().intDefault(Integer.parseInt(defaultValue));
             } else {
-                typeBuilder.intType();
+                typeBuilder.intType().noDefault();
             }
             break;
         case DOUBLE:
             if (defaultValue != null) {
                 typeBuilder.doubleType().doubleDefault(Double.parseDouble(defaultValue));
             } else {
-                typeBuilder.doubleType();
+                typeBuilder.doubleType().noDefault();
             }
             break;
         case FLOAT:
             if (defaultValue != null) {
                 typeBuilder.floatType().floatDefault(Float.parseFloat(defaultValue));
             } else {
-                typeBuilder.intType();
+                typeBuilder.floatType().noDefault();
             }
             break;
         case BYTES:
-            typeBuilder.bytesType();
+            typeBuilder.bytesType().noDefault();
             break;
         default:
             break;

@@ -1,5 +1,6 @@
 package dev.arichard.parqueditor.processor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import javafx.beans.property.StringProperty;
 
 public class RecordsProcessor implements Processor<Map<FieldAdapter, StringProperty>, List<Record>> {
     
-    private List<Record> records;
+    private List<Record> records = new ArrayList<>();
     
     private Schema schema;
     

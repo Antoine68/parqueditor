@@ -157,17 +157,20 @@ public class MainController implements Initializable {
     private void save(File file) {
         threadService.executeTaskThenUpdateUi(() -> {
             ParquetSchemaProcessor schemaProcessor = new ParquetSchemaProcessor("schema", "");
-            for (FieldAdapter fieldAdapter: fields) {
-                schemaProcessor.processLine(fieldAdapter);
-            }
-            Schema schema = schemaProcessor.getProcessedValue();
-            System.out.println(schema);
-            RecordsProcessor recordsProcessor = new RecordsProcessor(schema);
-            for (Map<FieldAdapter, StringProperty> line: contentTable.getItems()) {
-                recordsProcessor.processLine(line);
-            }
-            ParquetWriter writer = new ParquetWriter(schema, recordsProcessor.getProcessedValue());
-            writer.write(file);
+            try {
+                for (FieldAdapter fieldAdapter: fields) {
+                    schemaProcessor.processLine(fieldAdapter);
+                }
+                Schema schema = schemaProcessor.getProcessedValue();
+                RecordsProcessor recordsProcessor = new RecordsProcessor(schema);
+                for (Map<FieldAdapter, StringProperty> line: contentTable.getItems()) {
+                    recordsProcessor.processLine(line);
+                }
+                ParquetWriter writer = new ParquetWriter(schema, recordsProcessor.getProcessedValue());
+                writer.write(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }           
             return null;
         }, null, null);
         
