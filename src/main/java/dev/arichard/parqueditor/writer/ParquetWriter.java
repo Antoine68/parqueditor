@@ -42,7 +42,7 @@ public class ParquetWriter implements Writer {
             records.forEach(r -> {
                 try {
                     writer.write(r);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
