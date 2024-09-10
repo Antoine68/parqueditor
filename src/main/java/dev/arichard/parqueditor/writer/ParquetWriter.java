@@ -12,6 +12,7 @@ import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.apache.parquet.hadoop.util.HadoopOutputFile;
 import org.apache.parquet.io.OutputFile;
+import org.apache.parquet.hadoop.ParquetFileWriter;
 
 public class ParquetWriter implements Writer {
     
@@ -38,6 +39,7 @@ public class ParquetWriter implements Writer {
                 .withSchema(schema)
                 .withConf(config)
                 .withCompressionCodec(CompressionCodecName.SNAPPY)
+                .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
                 .build()) {
             records.forEach(r -> {
                 try {
