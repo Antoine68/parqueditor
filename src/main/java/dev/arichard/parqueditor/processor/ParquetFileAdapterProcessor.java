@@ -15,6 +15,7 @@ import org.apache.avro.generic.GenericRecord;
 import dev.arichard.parqueditor.adapter.FieldAdapter;
 import dev.arichard.parqueditor.adapter.ParquetFileAdapter;
 import dev.arichard.parqueditor.parser.Parser;
+import dev.arichard.parqueditor.util.ParquetUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -35,8 +36,7 @@ public class ParquetFileAdapterProcessor implements Processor<GenericRecord, Par
 
         Map<FieldAdapter, StringProperty> line = new HashMap<>();
         for (FieldAdapter field : adapter.getFields()) {
-            Object value = gr.get(field.getName());
-            line.put(field, new SimpleStringProperty(value == null ? null : value.toString()));
+            line.put(field, new SimpleStringProperty(ParquetUtil.toString(gr.get(field.getName()))));
         }
         adapter.addLine(line);
     }

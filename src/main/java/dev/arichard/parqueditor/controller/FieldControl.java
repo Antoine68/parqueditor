@@ -45,7 +45,7 @@ public class FieldControl extends VBox {
     private BooleanProperty detailVisible = new SimpleBooleanProperty(true);
 
     private final ObservableList<Schema.Type> typeChoices = FXCollections.observableArrayList(Schema.Type.BOOLEAN,
-            Schema.Type.DOUBLE, Schema.Type.FLOAT, Schema.Type.INT, Schema.Type.LONG, Schema.Type.STRING);
+            Schema.Type.DOUBLE, Schema.Type.FLOAT, Schema.Type.INT, Schema.Type.LONG, Schema.Type.STRING, Schema.Type.BYTES);
 
     private final ResourceBundle resources;
 

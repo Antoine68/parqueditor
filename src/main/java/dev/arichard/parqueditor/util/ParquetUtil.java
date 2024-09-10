@@ -1,13 +1,23 @@
 package dev.arichard.parqueditor.util;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 
 public class ParquetUtil {
     
     private ParquetUtil() {
         
+    }
+    
+    public static String toString(Object value) {
+        if (value == null) return null;
+        if (value instanceof ByteBuffer) {
+            return StandardCharsets.UTF_8.decode((ByteBuffer) value).toString();
+        }
+        return value.toString();
     }
     
     public static Object format(String value, Schema.Type type) {
