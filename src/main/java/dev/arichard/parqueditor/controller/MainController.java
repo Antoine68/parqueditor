@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,6 +33,8 @@ import dev.arichard.parqueditor.service.ParquetFileService;
 import dev.arichard.parqueditor.service.ThreadService;
 import dev.arichard.parqueditor.writer.ParquetWriter;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
@@ -53,6 +56,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 @Component
@@ -74,7 +78,7 @@ public class MainController implements Initializable {
     @FXML
     private VBox fieldContainer;
     
-    private File currentFile;
+    private ObjectProperty<File> currentFile = new SimpleObjectProperty<>();
  
     private final ExtensionFilter openExtensionFilter = new ExtensionFilter("Parquet", List.of("*.parquet"));
 
@@ -120,7 +124,7 @@ public class MainController implements Initializable {
         fileChooser.setSelectedExtensionFilter(openExtensionFilter);
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
-            currentFile = file;
+            currentFile.set(file);
             contentTable.getItems().clear();
             fields.clear();
             threadService.executeTaskThenUpdateUi(() -> {
@@ -140,7 +144,7 @@ public class MainController implements Initializable {
             openSaveAs();
             return;
         }
-        save(currentFile);        
+        save(currentFile.get());        
     }
     
     @FXML
@@ -171,8 +175,12 @@ public class MainController implements Initializable {
             } catch (Exception e) {
                 e.printStackTrace();
             }           
-            return null;
-        }, null, null);
+            return file;
+        }, f -> {
+            if (!Objects.equals(currentFile.get(), f)) {
+                currentFile.set(f);
+            }
+        }, null);
         
     }
 
@@ -197,8 +205,18 @@ public class MainController implements Initializable {
             return;
         contentTable.getItems().add(Math.max(0, idx + delta), new HashMap<>());
     }
+    
+    private void setStageTitle(String title) {
+        Stage primStage = (Stage) contentTable.getScene().getWindow();
+        String baseTitle = primStage.getTitle().split("-")[0].trim();
+        primStage.setTitle(baseTitle + " - " + title);
+    }
 
     private void createListeners() {
+        currentFile.addListener((obs, old, val) -> {
+            if (val == null) return;
+            setStageTitle(val.getAbsolutePath());
+        });
         fields.addListener(new ListChangeListener<FieldAdapter>() {
             @Override
             public void onChanged(ListChangeListener.Change<? extends FieldAdapter> c) {
