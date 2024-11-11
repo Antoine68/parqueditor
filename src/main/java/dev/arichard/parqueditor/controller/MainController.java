@@ -33,7 +33,9 @@ import dev.arichard.parqueditor.service.ParquetFileService;
 import dev.arichard.parqueditor.service.ThreadService;
 import dev.arichard.parqueditor.writer.ParquetWriter;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -45,7 +47,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
@@ -83,6 +87,8 @@ public class MainController implements Initializable {
     private final ExtensionFilter openExtensionFilter = new ExtensionFilter("Parquet", List.of("*.parquet"));
 
     private final ObservableList<FieldAdapter> fields = FXCollections.observableArrayList();
+    
+    private final BooleanProperty loading = new SimpleBooleanProperty(false);
 
     private ResourceBundle resources;
 
@@ -110,6 +116,9 @@ public class MainController implements Initializable {
                         return row;
                     }
                 });
+        loading.addListener((obs, old, val) -> {
+            contentTable.getScene().setCursor(val ? Cursor.WAIT : Cursor.DEFAULT);
+        });
     }
 
     @FXML
@@ -127,6 +136,7 @@ public class MainController implements Initializable {
             currentFile.set(file);
             contentTable.getItems().clear();
             fields.clear();
+            loading.set(true);
             threadService.executeTaskThenUpdateUi(() -> {
                 Processor<GenericRecord, ParquetFileAdapter> processor = new ParquetFileAdapterProcessor();
                 parquetFileService.consumeFile(file, processor::processLine);
@@ -134,7 +144,11 @@ public class MainController implements Initializable {
             }, adapter -> {
                 fields.setAll(adapter.getFields());
                 contentTable.getItems().setAll(adapter.getLines());
-            }, null);
+                loading.set(false);
+            }, e -> {
+                loading.set(false);
+                fxmlService.showAlert(AlertType.ERROR, resources.getString("Error.during.open"), e.getSource().getException().getMessage());
+            });
         }
     }
     
@@ -159,28 +173,30 @@ public class MainController implements Initializable {
     }
     
     private void save(File file) {
+        loading.set(true);
         threadService.executeTaskThenUpdateUi(() -> {
             ParquetSchemaProcessor schemaProcessor = new ParquetSchemaProcessor("schema", "");
-            try {
-                for (FieldAdapter fieldAdapter: fields) {
-                    schemaProcessor.processLine(fieldAdapter);
-                }
-                Schema schema = schemaProcessor.getProcessedValue();
-                RecordsProcessor recordsProcessor = new RecordsProcessor(schema);
-                for (Map<FieldAdapter, StringProperty> line: contentTable.getItems()) {
-                    recordsProcessor.processLine(line);
-                }
-                ParquetWriter writer = new ParquetWriter(schema, recordsProcessor.getProcessedValue());
-                writer.write(file);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }           
+            for (FieldAdapter fieldAdapter: fields) {
+                schemaProcessor.processLine(fieldAdapter);
+            }
+            Schema schema = schemaProcessor.getProcessedValue();
+            RecordsProcessor recordsProcessor = new RecordsProcessor(schema);
+            for (Map<FieldAdapter, StringProperty> line: contentTable.getItems()) {
+                recordsProcessor.processLine(line);
+            }
+            ParquetWriter writer = new ParquetWriter(schema, recordsProcessor.getProcessedValue());
+            writer.write(file);           
             return file;
         }, f -> {
             if (!Objects.equals(currentFile.get(), f)) {
                 currentFile.set(f);
             }
-        }, null);
+            loading.set(false);
+            fxmlService.showAlert(AlertType.INFORMATION, resources.getString("File.saved"), f.getAbsolutePath());
+        }, e -> {
+            loading.set(false);
+            fxmlService.showAlert(AlertType.ERROR, resources.getString("Error.during.save"), e.getSource().getException().getMessage());
+        });
         
     }
 

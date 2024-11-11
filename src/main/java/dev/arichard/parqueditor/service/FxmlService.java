@@ -42,10 +42,7 @@ public class FxmlService {
         try {
             return load(path, control);
         } catch (Exception e) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setHeaderText("Error during " + path + " control loading");
-            alert.setContentText(e.getMessage());
-            alert.show();
+            showAlert(AlertType.ERROR, "Error during " + path + " control loading", e.getMessage());
         }
         return null;
     }
@@ -54,6 +51,13 @@ public class FxmlService {
         FXMLLoader fxmlLoader = createLoader(path);
         fxmlLoader.setControllerFactory(this.context::getBean);
         return fxmlLoader.load();
+    }
+    
+    public void showAlert(AlertType type, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.show();
     }
     
     private FXMLLoader createLoader(String path) {
