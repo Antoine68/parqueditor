@@ -147,7 +147,7 @@ public class MainController implements Initializable {
                 loading.set(false);
             }, e -> {
                 loading.set(false);
-                fxmlService.showAlert(AlertType.ERROR, resources.getString("Error.during.open"), e.getSource().getException().getMessage());
+                fxmlService.showAlert(AlertType.ERROR, resources.getString("Error.during.open"), e.getSource().getException().toString());
             });
         }
     }
@@ -195,7 +195,7 @@ public class MainController implements Initializable {
             fxmlService.showAlert(AlertType.INFORMATION, resources.getString("File.saved"), f.getAbsolutePath());
         }, e -> {
             loading.set(false);
-            fxmlService.showAlert(AlertType.ERROR, resources.getString("Error.during.save"), e.getSource().getException().getMessage());
+            fxmlService.showAlert(AlertType.ERROR, resources.getString("Error.during.save"), e.getSource().getException().toString());
         });
         
     }
@@ -268,23 +268,8 @@ public class MainController implements Initializable {
         });
         fieldContainer.getChildren().add(fieldControl);
         TableColumn<Map<FieldAdapter, StringProperty>, String> col = new TableColumn<>();
-        col.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Map<FieldAdapter, StringProperty>, String>, ObservableValue<String>>() {
-                    @Override
-                    public ObservableValue<String> call(
-                            CellDataFeatures<Map<FieldAdapter, StringProperty>, String> param) {
-                        return param.getValue().computeIfAbsent(field, f -> new SimpleStringProperty());
-                    }
-                });
-        col.setCellFactory(
-                new Callback<TableColumn<Map<FieldAdapter, StringProperty>, String>, TableCell<Map<FieldAdapter, StringProperty>, String>>() {
-
-                    @Override
-                    public TableCell<Map<FieldAdapter, StringProperty>, String> call(
-                            TableColumn<Map<FieldAdapter, StringProperty>, String> param) {
-                        return new EditableTableCell<Map<FieldAdapter, StringProperty>>();
-                    }
-                });
+        col.setCellValueFactory(param -> param.getValue().computeIfAbsent(field, f -> new SimpleStringProperty()));
+        col.setCellFactory(param -> new EditableTableCell<Map<FieldAdapter, StringProperty>>());
         col.setUserData(field);
         col.textProperty().bind(field.nameProperty());
         contentTable.getColumns().add(col);

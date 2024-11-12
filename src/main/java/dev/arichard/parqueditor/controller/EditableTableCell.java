@@ -30,7 +30,6 @@ public class EditableTableCell<T> extends TableCell<T, String> {
     @Override
     public void cancelEdit() {
         super.cancelEdit();
-
         setText((String) getItem());
         setGraphic(null);
     }
@@ -59,27 +58,21 @@ public class EditableTableCell<T> extends TableCell<T, String> {
     private void createTextField() {
         textField = new TextField(getString());
         textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
-        textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
-                if (!arg2) {
-                    commitEdit(textField.getText());
-                }
+        textField.focusedProperty().addListener((obs, old, val) -> {
+            if (!val) {
+                commitEdit(textField.getText());
             }
         });
-        textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent t) {
-                if (KeyCode.ESCAPE.equals(t.getCode())) {
-                    cancelEdit();
-                } else if (KeyCode.TAB.equals(t.getCode()) || KeyCode.ENTER.equals(t.getCode())) {
-                    commitEdit(textField.getText());
-                    TableColumn<T, ?> nextColumn = getNextColumn(!t.isShiftDown());
-                    if (nextColumn != null) {
-                        getTableView().edit(getTableRow().getIndex(), nextColumn);
-                        getTableView().getFocusModel().focus(getTableRow().getIndex(), nextColumn);
-                        getTableView().requestFocus();
-                    }
+        textField.setOnKeyPressed(t -> {
+            if (KeyCode.ESCAPE.equals(t.getCode())) {
+                cancelEdit();
+            } else if (KeyCode.TAB.equals(t.getCode()) || KeyCode.ENTER.equals(t.getCode())) {
+                commitEdit(textField.getText());
+                TableColumn<T, ?> nextColumn = getNextColumn(!t.isShiftDown());
+                if (nextColumn != null) {
+                    getTableView().edit(getTableRow().getIndex(), nextColumn);
+                    getTableView().getFocusModel().focus(getTableRow().getIndex(), nextColumn);
+                    getTableView().requestFocus();
                 }
             }
         });
