@@ -16,8 +16,8 @@ import org.apache.parquet.hadoop.ParquetFileWriter;
 
 public class ParquetWriter implements Writer {
     
-    private Schema schema;
-    private List<Record> records;
+    private final Schema schema;
+    private final List<Record> records;
     
     public ParquetWriter(Schema schema, List<Record> records) {
         this.schema = schema;
@@ -48,7 +48,6 @@ public class ParquetWriter implements Writer {
                     e.printStackTrace();
                 }
             });
-            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

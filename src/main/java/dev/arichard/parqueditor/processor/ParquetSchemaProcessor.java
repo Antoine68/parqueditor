@@ -1,8 +1,6 @@
 package dev.arichard.parqueditor.processor;
 
 import java.nio.ByteBuffer;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -10,18 +8,16 @@ import org.apache.avro.SchemaBuilder.BaseFieldTypeBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldTypeBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
-import org.apache.avro.SchemaBuilder.TypeBuilder;
 
 import dev.arichard.parqueditor.adapter.FieldAdapter;
 import dev.arichard.parqueditor.util.ParquetUtil;
 
 public class ParquetSchemaProcessor implements Processor<FieldAdapter, Schema>{
-    
-    private final RecordBuilder<Schema> builder;
+
     private final FieldAssembler<Schema> fields;
     
     public ParquetSchemaProcessor(String name, String namespace) {
-        builder = SchemaBuilder.record(name).namespace(namespace);
+        RecordBuilder<Schema> builder = SchemaBuilder.record(name).namespace(namespace);
         fields = builder.fields();
     }
 

@@ -16,12 +16,12 @@ import javafx.scene.control.Alert.AlertType;
 @Service
 public class FxmlService {
 
-    private final static List<String> SUPPORTED_LOCALES = List.of("en", "fr");
+    private static final List<String> SUPPORTED_LOCALES = List.of("en", "fr");
 
     @Autowired
     private ConfigurableApplicationContext context;
 
-    private ResourceBundle bundle;
+    private final ResourceBundle bundle;
 
     public FxmlService() {
         String userLocale = System.getProperty("user.language");

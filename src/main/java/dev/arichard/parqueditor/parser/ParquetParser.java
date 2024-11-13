@@ -20,7 +20,7 @@ public class ParquetParser implements Parser<GenericRecord> {
     @Override
     public List<GenericRecord> parse(File file) {
         List<GenericRecord> result = new ArrayList<>();
-        streamParse(file, gr -> result.add(gr));
+        streamParse(file, result::add);
         return result;
     }
     

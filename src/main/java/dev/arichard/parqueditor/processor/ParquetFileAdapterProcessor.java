@@ -1,20 +1,15 @@
 package dev.arichard.parqueditor.processor;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 
 import dev.arichard.parqueditor.adapter.FieldAdapter;
 import dev.arichard.parqueditor.adapter.ParquetFileAdapter;
-import dev.arichard.parqueditor.parser.Parser;
 import dev.arichard.parqueditor.util.ParquetUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -54,11 +49,8 @@ public class ParquetFileAdapterProcessor implements Processor<GenericRecord, Par
         if (!field.schema().getType().equals(Schema.Type.UNION)) {
             return field.schema().getType();
         }
-        Optional<Schema.Type> optional = field.schema().getTypes().stream().filter(s -> !s.getType().equals(Schema.Type.NULL)).map(s -> s.getType()).findFirst();
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return Schema.Type.STRING;
+        Optional<Schema.Type> optional = field.schema().getTypes().stream().map(Schema::getType).filter(type -> !type.equals(Schema.Type.NULL)).findFirst();
+        return optional.orElse(Schema.Type.STRING);
     }
 
     private boolean isNullable(Schema.Field field) {

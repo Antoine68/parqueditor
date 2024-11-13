@@ -14,9 +14,9 @@ import javafx.beans.property.StringProperty;
 
 public class RecordsProcessor implements Processor<Map<FieldAdapter, StringProperty>, List<Record>> {
     
-    private List<Record> records = new ArrayList<>();
+    private final List<Record> records = new ArrayList<>();
     
-    private Schema schema;
+    private final Schema schema;
     
     public RecordsProcessor(Schema schema) {
         this.schema = schema;

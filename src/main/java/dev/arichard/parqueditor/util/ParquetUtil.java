@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
 
 public class ParquetUtil {
     
@@ -33,7 +32,7 @@ public class ParquetUtil {
         case LONG:
             return Long.parseLong(value == null ? "0" : value);
         case BYTES:
-            if (value == null) return value;
+            if (value == null) return null;
             return ByteBuffer.wrap(value.getBytes());
         default:
             return value;

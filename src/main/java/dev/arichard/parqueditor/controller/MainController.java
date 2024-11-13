@@ -2,20 +2,16 @@ package dev.arichard.parqueditor.controller;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -29,7 +25,6 @@ import dev.arichard.parqueditor.processor.Processor;
 import dev.arichard.parqueditor.processor.RecordsProcessor;
 import dev.arichard.parqueditor.service.FileService;
 import dev.arichard.parqueditor.service.FxmlService;
-import dev.arichard.parqueditor.service.ParquetFileService;
 import dev.arichard.parqueditor.service.ThreadService;
 import dev.arichard.parqueditor.writer.ParquetWriter;
 import javafx.beans.binding.Bindings;
@@ -39,12 +34,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
@@ -52,16 +45,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 @Component
 @Scope("prototype")
@@ -98,27 +88,21 @@ public class MainController implements Initializable {
         contentTable.getItems().add(new HashMap<>());
         createListeners();
         contentTable.setRowFactory(
-                new Callback<TableView<Map<FieldAdapter, StringProperty>>, TableRow<Map<FieldAdapter, StringProperty>>>() {
-                    @Override
-                    public TableRow<Map<FieldAdapter, StringProperty>> call(
-                            TableView<Map<FieldAdapter, StringProperty>> param) {
-                        final TableRow<Map<FieldAdapter, StringProperty>> row = new TableRow<>();
-                        final ContextMenu rowMenu = new ContextMenu();
-                        rowMenu.getItems()
-                                .addAll(createMenuItem(concatLocales(" ", "Add", "row", "before"),
-                                        e -> addRow(row.getItem(), 0)),
-                                        createMenuItem(concatLocales(" ", "Add", "row", "after"),
-                                                e -> addRow(row.getItem(), 1)),
-                                        createMenuItem(concatLocales(" ", "Delete", "row"),
-                                                e -> contentTable.getItems().remove(row.getItem())));
-                        row.contextMenuProperty()
-                                .bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(rowMenu));
-                        return row;
-                    }
+                param -> {
+                    final TableRow<Map<FieldAdapter, StringProperty>> row = new TableRow<>();
+                    final ContextMenu rowMenu = new ContextMenu();
+                    rowMenu.getItems()
+                            .addAll(createMenuItem(concatLocales(" ", "Add", "row", "before"),
+                                    e -> addRow(row.getItem(), 0)),
+                                    createMenuItem(concatLocales(" ", "Add", "row", "after"),
+                                            e -> addRow(row.getItem(), 1)),
+                                    createMenuItem(concatLocales(" ", "Delete", "row"),
+                                            e -> contentTable.getItems().remove(row.getItem())));
+                    row.contextMenuProperty()
+                            .bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(rowMenu));
+                    return row;
                 });
-        loading.addListener((obs, old, val) -> {
-            contentTable.getScene().setCursor(val ? Cursor.WAIT : Cursor.DEFAULT);
-        });
+        loading.addListener((obs, old, val) -> contentTable.getScene().setCursor(val ? Cursor.WAIT : Cursor.DEFAULT));
     }
 
     @FXML
@@ -206,12 +190,7 @@ public class MainController implements Initializable {
 
     private MenuItem createMenuItem(String text, Consumer<ActionEvent> action) {
         MenuItem menuItem = new MenuItem(text);
-        menuItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                action.accept(event);
-            }
-        });
+        menuItem.setOnAction(action::accept);
         return menuItem;
     }
 
@@ -233,16 +212,13 @@ public class MainController implements Initializable {
             if (val == null) return;
             setStageTitle(val.getAbsolutePath());
         });
-        fields.addListener(new ListChangeListener<FieldAdapter>() {
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends FieldAdapter> c) {
-                while (c.next()) {
-                    if (c.getAddedSize() > 0) {
-                        addFieldControls(c.getAddedSubList());
-                    }
-                    if (c.getRemovedSize() > 0) {
-                        removeFieldControls(c.getRemoved());
-                    }
+        fields.addListener((ListChangeListener<FieldAdapter>) c -> {
+            while (c.next()) {
+                if (c.getAddedSize() > 0) {
+                    addFieldControls(c.getAddedSubList());
+                }
+                if (c.getRemovedSize() > 0) {
+                    removeFieldControls(c.getRemoved());
                 }
             }
         });
@@ -263,9 +239,7 @@ public class MainController implements Initializable {
         if (!success.get()) {
             return;
         }
-        fieldControl.setOnRemove(() -> {
-            fields.remove(field);
-        });
+        fieldControl.setOnRemove(() -> fields.remove(field));
         fieldContainer.getChildren().add(fieldControl);
         TableColumn<Map<FieldAdapter, StringProperty>, String> col = new TableColumn<>();
         col.setCellValueFactory(param -> param.getValue().computeIfAbsent(field, f -> new SimpleStringProperty()));
@@ -294,10 +268,10 @@ public class MainController implements Initializable {
         int i = 0;
         while (i < nodes.size() && idx < 0) {
             T node = nodes.get(i);
-            if (node instanceof Node && field.equals((FieldAdapter) ((Node) node).getUserData())) {
+            if (node instanceof Node && field.equals(((Node) node).getUserData())) {
                 idx = i;
             } else if (node instanceof TableColumn
-                    && field.equals((FieldAdapter) ((TableColumn<?, ?>) node).getUserData())) {
+                    && field.equals(((TableColumn<?, ?>) node).getUserData())) {
                 idx = i;
             }
             i++;

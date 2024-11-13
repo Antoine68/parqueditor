@@ -27,7 +27,7 @@ public class ThreadService {
             task.setOnSucceeded(e -> onSucceeded.accept(task.getValue()));
         }
         if (onFailed != null) {
-            task.setOnFailed(e -> onFailed.accept(e));
+            task.setOnFailed(onFailed::accept);
         }
         executorService.execute(task);
     }

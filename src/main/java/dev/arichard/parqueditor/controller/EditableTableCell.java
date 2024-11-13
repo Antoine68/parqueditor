@@ -3,14 +3,10 @@ package dev.arichard.parqueditor.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 public class EditableTableCell<T> extends TableCell<T, String> {
 
@@ -30,7 +26,7 @@ public class EditableTableCell<T> extends TableCell<T, String> {
     @Override
     public void cancelEdit() {
         super.cancelEdit();
-        setText((String) getItem());
+        setText(getItem());
         setGraphic(null);
     }
 
@@ -119,6 +115,6 @@ public class EditableTableCell<T> extends TableCell<T, String> {
     }
 
     private String getString() {
-        return getItem() == null ? "" : getItem().toString();
+        return getItem() == null ? "" : getItem();
     }
 }
