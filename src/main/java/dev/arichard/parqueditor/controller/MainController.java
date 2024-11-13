@@ -138,7 +138,7 @@ public class MainController implements Initializable {
     
     @FXML
     private void save() {
-        if (currentFile == null) {
+        if (currentFile.get() == null) {
             openSaveAs();
             return;
         }
